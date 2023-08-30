@@ -1,7 +1,7 @@
 const db = require('../models/db')
 
 exports.getEmployees = (req, res) => {
-    const query = 'SELECT employees.id, employees.name, employees.email, employees.phone, employees.nid, employees.dob, employees.blood_group, department.department_name, designation.designation_name FROM employees,department,designation WHERE employees.department_id = department.id AND employees.designation_id = designation.id';
+    const query = 'SELECT employees.id, employees.name, employees.email, employees.phone, employees.gender,employees.nid, employees.dob, employees.blood_group, department.department_name, designation.designation_name FROM employees,department,designation WHERE employees.department_id = department.id AND employees.designation_id = designation.id';
     db.query(query, (error, result) => {
         if (error) {
             console.log(error);
@@ -32,12 +32,13 @@ exports.getEmployeeById = (req, res) => {
 exports.addEmployee = (req, res) => {
     const body = req.body;
     let empid = [];
-    const { name, email, phone, nid, dob, bloodg, designation, department, addressType, streetAddress, state, city, postalCode, country } = body;
-    const query = 'INSERT INTO employees (name, email, phone, nid, dob, blood_group, designation_id, department_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-    const values = [name, email, phone, nid, dob, bloodg, designation, department];
+    const { name, email, phone, gender, nid, dob, bloodg, designation, department, addressType, streetAddress, state, city, postalCode, country } = body;
+    const query = 'INSERT INTO employees (name, email, phone, gender, nid, dob, blood_group, designation_id, department_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const values = [name, email, phone, gender, nid, dob, bloodg, designation, department];
     db.query(query, values, (error, result) => {
         if (error) {
             console.log(error);
+            res.send(JSON.stringify({ message: 'Employee duplication detected' }));
         } else {
             const employeeId = result.insertId;
             const insertAddressQuery = 'INSERT INTO empaddresses (emp_id,address_type, street_address, state, city, postal,country) VALUES ?';
@@ -61,17 +62,17 @@ exports.addEmployee = (req, res) => {
 exports.updateEmployee = (req, res) => {
     const body = req.body;
     const {
-        name, email, phone, nid, dob, bloodg, designation, department,
+        name, email, phone, gender, nid, dob, bloodg, designation, department,
         addressType, streetAddress, state, city, postalCode, country
     } = body;
     const employee_id = req.params.id;
-
+    console.log(body);
     const updateEmployeeQuery = `
         UPDATE employees
-        SET name = ?, email = ?, phone = ?, nid = ?, dob = ?, blood_group = ?, designation_id = ?, department_id = ?
+        SET name = ?, email = ?, phone = ?, gender = ?, nid = ?, dob = ?, blood_group = ?, designation_id = ?, department_id = ?
         WHERE id = ?
     `;
-    const updateEmployeeValues = [name, email, phone, nid, dob, bloodg, designation, department, employee_id];
+    const updateEmployeeValues = [name, email, phone, gender, nid, dob, bloodg, designation, department, employee_id];
 
     db.query(updateEmployeeQuery, updateEmployeeValues, (error, result) => {
         if (error) {
@@ -135,7 +136,7 @@ exports.updateEmployee = (req, res) => {
     });
 };
 
-exports.deleteEmployee = () => {
+exports.deleteEmployee = (req, res) => {
     const id = req.params.id;
     const deleteAddressesQuery = 'DELETE FROM empaddresses WHERE emp_id = ?';
     const deleteJobHistoriesQuery = 'DELETE FROM jobhistories WHERE emp_id = ?';

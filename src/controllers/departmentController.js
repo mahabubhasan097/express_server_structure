@@ -37,6 +37,7 @@ exports.addDepartment = (req, res) => {
     const values = [deptname];
     db.query(query, values, (error, result) => {
         if (error) {
+            res.send(JSON.stringify({ message: 'Department already exists.' }));
             console.log(error);
         } else {
             res.send(JSON.stringify({ message: 'Department added successfully' }));

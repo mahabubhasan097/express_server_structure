@@ -38,8 +38,8 @@ exports.addDesignation = (req, res) => {
     const values = [desgname];
     db.query(query, values, (error, result) => {
         if (error) {
-            res.send(JSON.stringify({ message: 'Designation add failed' }));
             console.log(error);
+            res.send(JSON.stringify({ message: 'Designation already exists.' }));
         } else {
             res.send(JSON.stringify({ message: 'Designation added successfully' }));
         }
